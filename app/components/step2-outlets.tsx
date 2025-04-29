@@ -3,7 +3,6 @@
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
 
 interface Step2Props {
   menuData: {
@@ -44,26 +43,6 @@ export function Step2Outlets({ menuData, updateMenuData, nextStep, prevStep }: S
     <div className="flex justify-center w-full">
       <div className="space-y-4 w-[50vw]">
         <div className="space-y-4">
-          {/* Select All option */}
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="select-all"
-              checked={allSelected}
-              onCheckedChange={handleSelectAll}
-              className="data-[state=indeterminate]:bg-primary data-[state=indeterminate]:text-primary-foreground"
-              ref={(input) => {
-                if (input) {
-                  input.indeterminate = someSelected
-                }
-              }}
-            />
-            <Label htmlFor="select-all" className="font-medium">
-              Select All Outlets
-            </Label>
-          </div>
-
-          <Separator className="my-2" />
-
           {/* Individual outlets */}
           <div className="space-y-2 pl-1">
             {outlets.map((outlet) => (
@@ -72,6 +51,7 @@ export function Step2Outlets({ menuData, updateMenuData, nextStep, prevStep }: S
                   id={outlet}
                   checked={menuData.outlets.includes(outlet)}
                   onCheckedChange={() => handleOutletChange(outlet)}
+                  className="checkbox"
                 />
                 <Label htmlFor={outlet}>{outlet}</Label>
               </div>
@@ -88,4 +68,3 @@ export function Step2Outlets({ menuData, updateMenuData, nextStep, prevStep }: S
     </div>
   )
 }
-

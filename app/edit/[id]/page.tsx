@@ -88,4 +88,3 @@ export default function EditMenuPage({ params }: { params: { id: string } }) {
     </div>
   )
 }
-

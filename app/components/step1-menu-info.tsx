@@ -46,4 +46,3 @@ export function Step1MenuInfo({ menuData, updateMenuData, nextStep }: Step1Props
     </div>
   )
 }
-

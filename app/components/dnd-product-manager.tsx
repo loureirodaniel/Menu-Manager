@@ -219,6 +219,9 @@ export default function DndProductManager({ products: initialProducts }: { produ
       setActiveProduct(activeData.product)
       document.body.classList.add("is-dragging")
       document.body.classList.add("is-dragging-active")
+
+      // Add a class to indicate we're in a constrained drag mode
+      document.body.classList.add("constrained-drag")
     }
   }
 
@@ -234,6 +237,7 @@ export default function DndProductManager({ products: initialProducts }: { produ
 
     document.body.classList.remove("is-dragging")
     document.body.classList.remove("is-dragging-active")
+    document.body.classList.remove("constrained-drag")
 
     // Reset active product
     setActiveProduct(null)
@@ -293,4 +297,3 @@ export default function DndProductManager({ products: initialProducts }: { produ
     </DndContext>
   )
 }
-

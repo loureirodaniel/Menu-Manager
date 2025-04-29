@@ -76,6 +76,28 @@
     @apply bg-background text-foreground;
     isolation: isolate;
   }
+
+  /* Add blue outline to input fields when focused */
+  input:focus,
+  textarea:focus,
+  select:focus {
+    outline: 2px solid hsl(var(--primary)) !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 2px rgba(59, 55, 242, 0.1) !important;
+  }
+}
+
+/* Update the checkbox styling to have blue background when checked */
+.checkbox {
+  color: #d1d5db !important; /* Light grey color */
+  border-color: #d1d5db !important;
+}
+
+/* When checked, use the blue background with white check icon */
+.checkbox[data-state="checked"] {
+  background-color: #3b37f2 !important; /* RGB 59 55 242 */
+  border-color: #3b37f2 !important;
+  color: white !important; /* White check icon */
 }
 
 /* Enhanced drag and drop styles */
@@ -92,18 +114,37 @@
 /* Improved drop zone visibility */
 [data-droppable="true"] {
   transition: background-color 0.2s, border-color 0.2s, box-shadow 0.2s;
+  /* Keep padding consistent */
+  padding: 0 !important;
+  margin: 0 !important;
 }
 
-[data-droppable="true"][data-over="true"] {
-  background-color: rgba(0, 0, 0, 0.05) !important;
-  border: 3px dashed hsl(var(--primary)) !important;
-  box-shadow: 0 0 0 4px rgba(0, 0, 0, 0.02);
+/* Section header specific styles - NO BORDER */
+.section-header-droppable {
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  outline: none !important;
 }
 
-/* Highlight droppable areas during drag */
-body.is-dragging [data-droppable="true"] {
-  border: 2px dashed rgba(0, 0, 0, 0.2);
-  background-color: rgba(0, 0, 0, 0.02);
+.section-header-droppable[data-over="true"] {
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  outline: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Ensure dropzones have dotted borders when highlighted - EXCEPT SECTION HEADERS */
+[data-droppable="true"][data-over="true"]:not(.section-header-droppable) {
+  border-style: dotted !important;
+  border-width: 1.5px !important;
+}
+
+/* Only highlight droppable areas when dragging a product */
+body.is-dragging-product [data-droppable="true"][data-over="true"] {
+  /* These styles will be applied via inline styles instead */
 }
 
 /* Ensure draggable items have proper z-index */
@@ -119,15 +160,20 @@ body.is-dragging [data-droppable="true"] {
   z-index: 2;
 }
 
-/* Active dragging state */
-.draggable-item[data-dragging="true"] {
-  z-index: 999;
-  opacity: 0.4;
+/* Product ghost state - keep the item visible but with a ghost-like appearance */
+.product-ghost {
+  opacity: 0.6 !important;
+  background-color: rgba(59, 55, 242, 0.05) !important;
+  border-color: rgba(59, 55, 242, 0.3) !important;
+  box-shadow: none !important;
+  pointer-events: none !important;
+  position: relative !important;
+  transform: none !important; /* Keep the item in its original position */
 }
 
 /* Highlight droppable during debug mode */
 .highlight-droppable {
-  outline: 2px solid red;
+  outline: 1.5px solid red;
 }
 
 /* Add these styles to the end of the file to enhance the dragging experience */
@@ -158,14 +204,6 @@ body.is-dragging [data-droppable="true"] {
   font-weight: 700;
 }
 
-/* Improve the dragging state for items */
-.draggable-item[data-dragging="true"] {
-  z-index: 999;
-  opacity: 0.4;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transform: scale(1.02);
-}
-
 /* Add a subtle pulse animation to the drop zone when items are being dragged over */
 @keyframes pulse-border {
   0% {
@@ -179,7 +217,8 @@ body.is-dragging [data-droppable="true"] {
   }
 }
 
-[data-droppable="true"][data-over="true"] {
+/* Only apply pulse animation when a product is being dragged over - EXCEPT SECTION HEADERS */
+body.is-dragging-product [data-droppable="true"][data-over="true"]:not(.section-header-droppable) {
   animation: pulse-border 1.5s infinite;
 }
 
@@ -216,10 +255,9 @@ body.is-dragging [data-droppable="true"] {
   cursor: grabbing;
 }
 
-/* Add a subtle highlight to indicate where the section will be dropped */
 .sortable-section-placeholder {
   background-color: rgba(0, 0, 0, 0.05);
-  border: 2px dashed hsl(var(--primary));
+  border: 1.5px dashed hsl(var(--primary));
   border-radius: 0.5rem;
   margin: 0.5rem 0;
 }
@@ -227,12 +265,1755 @@ body.is-dragging [data-droppable="true"] {
 /* Always show a visible dropzone */
 [data-droppable="true"] {
   min-height: 100px;
-  border: 2px dashed hsl(var(--border));
+  /* Remove the default border for droppable areas */
+  border: none;
   border-radius: 0.5rem;
 }
 
-[data-droppable="true"]:hover:not([data-over="true"]) {
-  border-color: hsl(var(--border) / 0.8);
-  background-color: hsl(var(--accent) / 0.05);
+/* Only show hover effects when dragging a product */
+body.is-dragging-product [data-droppable="true"]:hover:not([data-over="true"]) {
+  border-color: transparent;
+  background-color: transparent;
 }
 
+/* Add these styles to the end of the file for the delete button hover effect */
+
+.group:hover .group-hover\:opacity-100 {
+  opacity: 1;
+}
+
+.transition-opacity {
+  transition-property: opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+/* Add hover effect for the action buttons */
+.group button:hover {
+  background-color: hsl(var(--muted));
+}
+
+/* Styles for closed section headers when dragging over */
+body.is-dragging-product [data-droppable="true"][data-over="true"].sticky {
+  /* Remove padding changes that cause shifting */
+  /* padding: 8px;
+  margin: -8px; */
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+/* Pulse animation for section headers when dragging over */
+@keyframes section-header-pulse {
+  0% {
+    background-color: #f9f9f9;
+  }
+  50% {
+    background-color: #f0f0f0;
+  }
+  100% {
+    background-color: #f9f9f9;
+  }
+}
+
+/* Only apply pulse animation to section headers when a product is being dragged over */
+body.is-dragging-product [data-droppable="true"][data-over="true"].sticky {
+  animation: section-header-pulse 1.5s infinite;
+  border: none !important;
+  outline: none !important;
+}
+
+/* Remove hover effects when not dragging a product */
+body:not(.is-dragging-product) [data-droppable="true"].sticky:not([data-over="true"]):hover {
+  background-color: transparent;
+  border: none;
+  border-radius: 0;
+  cursor: default;
+}
+
+/* More prominent highlight for section headers when dragging over */
+body.is-dragging-product [data-droppable="true"][data-over="true"].sticky {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Enhanced pulse animation for section headers */
+@keyframes section-header-pulse {
+  0% {
+    background-color: #f9f9f9;
+  }
+  50% {
+    background-color: #f0f0f0;
+  }
+  100% {
+    background-color: #f9f9f9;
+  }
+}
+
+/* Only apply pulse animation to section headers when a product is being dragged over */
+body.is-dragging-product [data-droppable="true"][data-over="true"].sticky {
+  animation: section-header-pulse 1.2s infinite;
+}
+
+/* Add a subtle scale effect when hovering over closed sections while dragging */
+body.is-dragging .sticky[data-droppable="true"]:hover {
+  transform: scale(1.01);
+  transition: transform 0.2s ease;
+}
+
+/* Add these styles for the drop confirmation animation */
+@keyframes highlight-success {
+  0% {
+    background-color: hsl(var(--primary) / 0.1);
+  }
+  50% {
+    background-color: hsl(142, 76%, 95%);
+  }
+  100% {
+    background-color: transparent;
+  }
+}
+
+.drop-success {
+  animation: highlight-success 2s ease-out forwards;
+}
+
+/* Add a subtle scale animation for newly added items */
+@keyframes scale-in {
+  0% {
+    transform: scale(0.95);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.02);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.item-added {
+  animation: scale-in 0.5s ease-out forwards;
+}
+
+/* Remove these animations since we're using Framer Motion now */
+/* Animation for newly added items */
+@keyframes highlight-new-item {
+  0% {
+    background-color: #ffffff;
+    color: #000000;
+  }
+  50% {
+    background-color: #3b37f2;
+    color: #ffffff;
+    box-shadow: 0 4px 14px 0 rgba(59, 55, 242, 0.4);
+    transform: scale(1.02);
+  }
+  100% {
+    background-color: #ffffff;
+    color: #000000;
+  }
+}
+
+.item-recently-added {
+  animation: highlight-new-item 3s ease-in-out;
+  position: relative;
+}
+
+.item-recently-added::after {
+  content: "Item added";
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: #3b37f2;
+  color: white;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  border-bottom-left-radius: 8px;
+  animation: fade-out 3s ease-in-out forwards;
+  z-index: 10;
+}
+
+@keyframes fade-out {
+  0%,
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+/* Improve dropzone detection for closed sections */
+[data-droppable="true"] {
+  pointer-events: auto !important;
+}
+
+/* Ensure drag overlay doesn't interfere with drop detection */
+.dnd-kit-drag-overlay {
+  pointer-events: none !important;
+}
+
+/* Make closed section dropzones more prominent */
+body.is-dragging-product [data-droppable="true"]:not([data-over="true"]):hover:not(.section-header-droppable) {
+  background-color: #f9f9f9;
+  border-color: #e5e7eb;
+  transition: all 0.2s ease;
+}
+
+/* Ensure the entire section header is clickable for drops */
+.accordion-item-header {
+  position: relative;
+  z-index: 5;
+}
+
+/* Fix z-index stacking for drag operations */
+body.is-dragging {
+  --dragging-z-index: 1000;
+}
+
+/* Ensure dropzones are always accessible */
+[data-droppable="true"] {
+  z-index: 5;
+}
+
+/* Increase z-index when being dragged over */
+[data-droppable="true"][data-over="true"] {
+  z-index: 30 !important;
+}
+
+/* Improve dropzone detection for all directions */
+[data-droppable="true"] {
+  position: relative;
+  overflow: visible;
+}
+
+/* Create a larger hit area for dropzones */
+[data-droppable="true"]::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  z-index: -1;
+  pointer-events: auto;
+}
+
+/* Increase the hit area for closed section headers */
+body.is-dragging-product [data-droppable="true"]:not([data-over="true"]) {
+  transition: all 0.2s ease;
+}
+
+/* Make dropzones more sensitive to vertical movement */
+body.is-dragging-product [data-droppable="true"] {
+  /* Remove the padding and margin changes that cause shifting */
+  /* padding: 5px;
+  margin: -5px; */
+  transition: all 0.2s ease;
+}
+
+/* Add these styles at the end of the file to prevent animation back to original position */
+
+/* Prevent animation back to original position after drop */
+body.drag-operation-complete .dnd-kit-draggable {
+  transition: none !important;
+}
+
+body.drag-operation-complete [data-draggable="true"] {
+  transition: none !important;
+}
+
+/* Ensure drag overlay disappears immediately */
+body.drag-operation-complete .dnd-kit-drag-overlay {
+  transition: none !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Prevent any transform animations during drag completion */
+body.drag-operation-complete * {
+  transition-property: background-color, border-color, color, fill, stroke !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-duration: 150ms !important;
+}
+
+/* Override any transform transitions specifically */
+body.drag-operation-complete *[style*="transform"] {
+  transition: none !important;
+}
+
+/* Ensure the draggable item doesn't animate back */
+body.drag-operation-complete [data-dragging="true"]:not(.product-ghost) {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+/* Keep the ghost item visible even after drag operation completes */
+body.drag-operation-complete .product-ghost {
+  opacity: 0.6 !important;
+  background-color: rgba(59, 55, 242, 0.05) !important;
+  border-color: rgba(59, 55, 242, 0.3) !important;
+  transform: none !important;
+  transition: opacity 0.3s ease-out !important;
+}
+
+/* Ensure DnD Kit doesn't animate the item back */
+body.drag-operation-complete .dnd-kit-transform-none {
+  transform: none !important;
+}
+
+/* New animations for drop interaction */
+@keyframes drop-target-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(59, 55, 242, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(59, 55, 242, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(59, 55, 242, 0);
+  }
+}
+
+.drop-target-pulse {
+  animation: drop-target-pulse 1s cubic-bezier(0.4, 0, 0.6, 1) 1;
+}
+
+.drop-item-highlight {
+  box-shadow: 0 0 0 2px hsl(var(--primary)), 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Disable all animations for dropped items */
+body.drag-operation-complete .draggable-item:not(.product-ghost),
+body.drag-operation-complete [data-dragging="true"]:not(.product-ghost),
+body.drag-operation-complete .dnd-kit-draggable:not(.product-ghost),
+body.drag-operation-complete .dnd-kit-drag-overlay,
+body.drag-operation-complete .drop-target-pulse,
+body.drag-operation-complete .drop-item-highlight,
+body.drag-operation-complete .item-recently-added,
+body.drag-operation-complete .item-added,
+body.drag-operation-complete .drop-success {
+  animation: none !important;
+  transition: none !important;
+  transform: none !important;
+  opacity: 1 !important;
+}
+
+/* Ensure dragged items disappear immediately */
+body.drag-operation-complete [data-dragging="true"]:not(.product-ghost) {
+  display: none !important;
+  opacity: 0 !important;
+}
+
+/* Override any animation styles */
+.drop-target-pulse,
+.drop-item-highlight,
+.item-recently-added,
+.item-added,
+.drop-success {
+  animation: none !important;
+}
+
+/* Prevent any transform transitions */
+* {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke !important;
+}
+
+/* Styles for snap-to-section animation */
+.snap-product-overlay {
+  transition: transform 0.3s cubic-bezier(0.2, 1, 0.1, 1), left 0.3s cubic-bezier(0.2, 1, 0.1, 1), top 0.3s
+    cubic-bezier(0.2, 1, 0.1, 1) !important;
+  transform-origin: center center;
+}
+
+body.snapping-to-section .snap-product-overlay {
+  transform: scale(0.8) !important;
+  opacity: 0.8 !important;
+}
+
+/* Override DnD Kit's transform during snapping */
+body.snapping-to-section .dnd-kit-drag-overlay {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Add these styles at the very end of the file to ensure they have the highest priority */
+
+/* Ensure the drag overlay stays visible during snap animation */
+body.snapping-to-section .dnd-kit-drag-overlay {
+  transition: none !important;
+  transform: none !important;
+  pointer-events: none !important;
+}
+
+/* Override DnD Kit's transform during snapping */
+body.snapping-to-section .dnd-kit-drag-overlay > div {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Completely disable DnD Kit's default animation when we're snapping */
+body.snapping-to-section .dnd-kit-draggable {
+  transition: none !important;
+  transform: none !important;
+}
+
+/* Force our snap animation to take precedence */
+.snap-product-overlay {
+  position: fixed !important;
+  z-index: 9999 !important;
+  transition: all 0.3s cubic-bezier(0.2, 1, 0.1, 1) !important;
+  pointer-events: none !important;
+  will-change: transform, left, top !important;
+}
+
+/* Prevent any DnD Kit animations from interfering with our snap */
+body.drag-operation-complete.snapping-to-section * {
+  transition-property: none !important;
+}
+
+/* Ensure the original dragged item is hidden immediately */
+body.snapping-to-section [data-dragging="true"]:not(.product-ghost) {
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+/* Add these styles at the end of the file to improve the drop animation */
+
+/* Completely prevent the snap-back animation */
+body.drag-operation-complete .dnd-kit-draggable:not(.product-ghost),
+body.drag-operation-complete [data-dragging="true"]:not(.product-ghost),
+body.drag-operation-complete .dnd-kit-drag-overlay {
+  transition: none !important;
+  animation: none !important;
+  transform: none !important;
+}
+
+/* Keep the ghost item visible in the side panel */
+body.is-dragging [data-dragging="true"].product-ghost {
+  opacity: 0.6 !important;
+  visibility: visible !important;
+  transform: none !important;
+  position: relative !important;
+}
+
+/* Improve the snap animation */
+.snap-product-overlay {
+  transition: transform 300ms cubic-bezier(0.2, 0.9, 0.4, 1), left 300ms cubic-bezier(0.2, 0.9, 0.4, 1), top 300ms
+    cubic-bezier(0.2, 0.9, 0.4, 1), opacity 250ms ease-in-out !important;
+  transform-origin: center center;
+  will-change: transform, left, top, opacity;
+}
+
+/* Add a fade-out at the end of the animation */
+body.snapping-to-section .snap-product-overlay {
+  opacity: 0 !important;
+}
+
+/* Ensure the drag overlay is properly positioned */
+.dnd-kit-drag-overlay {
+  pointer-events: none !important;
+  z-index: 9999 !important;
+}
+
+/* Add a nice fade-in animation for the newly added item */
+@keyframes fade-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.item-newly-added {
+  animation: fade-slide-in 0.4s ease-out forwards;
+}
+
+/* Restore the ghost item to normal after a delay */
+@keyframes restore-ghost {
+  to {
+    opacity: 1;
+    background-color: white;
+    border-color: #dfdfea;
+  }
+}
+
+.product-ghost.restore {
+  animation: restore-ghost 0.5s ease-out forwards;
+}
+
+/* Add styles for drop rejection animation */
+@keyframes drop-rejected-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20%,
+  60% {
+    transform: translateX(-5px);
+  }
+  40%,
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+body.drop-rejected .dnd-kit-drag-overlay {
+  animation: drop-rejected-shake 0.5s ease-in-out;
+}
+
+.drop-rejected-overlay {
+  border-color: hsl(var(--destructive)) !important;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2) !important;
+}
+
+/* Add a red flash effect when drop is rejected */
+@keyframes drop-rejected-flash {
+  0% {
+    background-color: rgba(239, 68, 68, 0);
+  }
+  50% {
+    background-color: rgba(239, 68, 68, 0.1);
+  }
+  100% {
+    background-color: rgba(239, 68, 68, 0);
+  }
+}
+
+body.drop-rejected .drop-rejected-overlay {
+  animation: drop-rejected-flash 0.5s ease-in-out, drop-rejected-shake 0.5s ease-in-out;
+}
+
+/* Add styles for the auto-opened animation at the end of the file */
+
+/* Animation for auto-opened sections */
+@keyframes auto-open-flash {
+  0% {
+    background-color: #f9f9f9;
+  }
+  50% {
+    background-color: #f0f0f0;
+  }
+  100% {
+    background-color: #f9f9f9;
+  }
+}
+
+.auto-opened {
+  animation: auto-open-flash 1s ease-out;
+}
+
+/* Remove the progress bar animation since we're handling it with React state now */
+body.is-dragging-product [data-droppable="true"][data-over="true"].sticky::after {
+  content: none;
+}
+
+/* Add these styles at the end of the file to improve drag constraints */
+
+/* Prevent dragging beyond the sidepanel */
+body.is-dragging-product .dnd-kit-drag-overlay {
+  pointer-events: none !important;
+}
+
+/* Add a constraint indicator when trying to drag beyond the limit */
+@keyframes constraint-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
+  }
+}
+
+/* Apply the constraint animation when trying to drag right */
+.draggable-item[data-constrained="true"] {
+  animation: constraint-pulse 0.5s cubic-bezier(0.4, 0, 0.6, 1) 1;
+}
+
+/* Section header dropzones */
+body.is-dragging-product [data-droppable="true"][data-over="true"].sticky {
+  border: none !important;
+}
+
+/* Fixed height for menu section headers */
+.menu-section-header {
+  height: 75px !important;
+  min-height: 75px !important;
+  max-height: 75px !important;
+  flex: 1 0 0;
+  align-items: center;
+}
+
+/* Add styles for the multi-select component in the product side panel */
+.multi-select-active {
+  background-color: #3b37f2 !important; /* RGB 59 55 242 */
+  color: white !important;
+}
+
+.multi-select-active button {
+  color: white !important;
+}
+
+/* Styles for independent scrolling areas */
+.menu-sections-scroll {
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+.side-panel-scroll {
+  height: calc(100vh - 80px);
+  overflow-y: auto;
+}
+
+/* Sticky header styles - UPDATED FOR PROPER POSITIONING */
+.menu-section-header.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: white;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure sticky headers have no top margin */
+.sticky.top-0 {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Ensure sticky headers have proper shadow ONLY when scrolled */
+.menu-section-header.sticky-header {
+  margin: 0 !important;
+  padding: 0 !important;
+  box-shadow: none;
+  border-bottom: none;
+  transition: box-shadow 0.2s ease-in-out, border-bottom 0.2s ease-in-out;
+}
+
+/* Apply shadow and border only when scrolled */
+.menu-section-header.sticky-header.scrolled {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12), 0 3px 6px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Ensure the shadow is visible when scrolled */
+.menu-section-header.sticky-header[style*="box-shadow"] {
+  z-index: 40;
+}
+
+/* Remove any potential margin/padding from parent containers */
+.sticky.top-0 {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Enhanced sticky header styles to prevent content showing through */
+.menu-section-header.sticky-header {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: white !important;
+  backdrop-filter: none !important;
+  z-index: 40 !important;
+}
+
+/* Ensure the sticky container has proper background */
+.sticky.top-0 {
+  margin: 0 !important;
+  padding: 0 !important;
+  background-color: white !important;
+  z-index: 40 !important;
+}
+
+/* Ensure no content bleeds through */
+.menu-section-header.sticky-header::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: white;
+  z-index: -1;
+}
+
+/* Ensure no blue background on closed sections after drop */
+.section-header-droppable[data-over="true"],
+.section-header-droppable {
+  background-color: white !important;
+  border: none !important;
+  border-width: 0 !important;
+  border-style: none !important;
+  outline: none !important;
+}
+
+/* Override any animation that might add a blue background */
+body.is-dragging-product .section-header-droppable[data-over="true"] {
+  animation: none !important;
+  background-color: white !important;
+}
+
+/* Ensure the section header doesn't show any blue background when items are dropped */
+body.is-dragging-product .section-header-droppable,
+body.is-dragging-product .section-header-droppable[data-over="true"] {
+  background-color: white !important;
+}
+
+/* Ensure no blue flash on drop */
+@keyframes section-header-drop {
+  0%,
+  100% {
+    background-color: white;
+  }
+}
+
+/* Apply this animation to section headers when items are dropped */
+.section-header-droppable {
+  animation: section-header-drop 0.3s ease-out;
+}
+
+/* Add these styles at the end of the file for the hover pulse effect */
+
+@keyframes hover-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+  }
+  70% {
+    box-shadow: 0 0 0 8px rgba(0, 0, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Progress bar for section hover */
+.section-hover-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background-color: hsl(var(--primary));
+  transition: width 0.05s linear;
+}
+
+/* Smooth transition for section opening */
+.section-content-enter {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.section-content-enter-active {
+  max-height: 2000px;
+  opacity: 1;
+}
+
+.section-content-exit {
+  max-height: 2000px;
+  opacity: 1;
+  overflow: hidden;
+  transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+}
+
+.section-content-exit-active {
+  max-height: 0;
+  opacity: 0;
+}
+
+/* Enhanced hover states for all sections, with special focus on first and last */
+.menu-section-wrapper {
+  position: relative;
+  isolation: isolate;
+}
+
+.menu-section-header.section-header-droppable {
+  position: relative;
+  z-index: 5;
+  transition: all 0.2s ease;
+  pointer-events: auto !important;
+}
+
+/* Special styles for first and last sections to ensure visibility */
+.menu-section-wrapper[data-first-section="true"] .section-header-droppable,
+.menu-section-wrapper[data-last-section="true"] .section-header-droppable {
+  z-index: 10;
+}
+
+/* Ensure hover states are visible when dragging */
+body.is-dragging-product .menu-section-wrapper[data-drag-over="true"] .section-header-droppable {
+  background-color: #f9f9f9 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+  z-index: 50 !important;
+}
+
+/* Ensure progress bar is visible for first and last sections */
+.menu-section-wrapper[data-first-section="true"] .section-hover-progress,
+.menu-section-wrapper[data-last-section="true"] .section-hover-progress {
+  z-index: 15;
+  height: 3px; /* Slightly taller for better visibility */
+  background-color: #3b37f2;
+}
+
+/* More pronounced pulse animation for all sections */
+@keyframes section-hover-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+  50% {
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+}
+
+/* Apply the enhanced pulse animation to section headers when hovering */
+body.is-dragging-product .menu-section-wrapper[data-drag-over="true"] .section-header-droppable {
+  animation: section-hover-pulse 1.5s infinite;
+}
+
+/* Explicit z-index for all menu structure components */
+.menu-sections-scroll {
+  position: relative;
+  z-index: 1;
+}
+
+.section-header-droppable {
+  position: relative;
+  z-index: 5;
+}
+
+[data-droppable="true"][data-over="true"] {
+  z-index: 10 !important;
+}
+
+/* Ensure that the first section's header is not obscured */
+.menu-section-wrapper:first-child .section-header-droppable {
+  margin-top: 1px; /* Tiny margin to prevent clipping */
+}
+
+/* Ensure the last section's header is not obscured */
+.menu-section-wrapper:last-child .section-header-droppable {
+  margin-bottom: 1px; /* Tiny margin to prevent clipping */
+}
+
+/* Enhanced hover states for all sections, with special focus on first and last */
+.menu-section-wrapper {
+  position: relative !important;
+  isolation: isolate;
+}
+
+.menu-section-wrapper.relative {
+  position: relative !important;
+}
+
+.menu-section-header.section-header-droppable {
+  position: relative !important;
+  z-index: 5 !important;
+  transition: all 0.2s ease;
+  pointer-events: auto !important;
+}
+
+/* Special styles for first and last sections to ensure visibility */
+.menu-section-wrapper[data-first-section="true"] .section-header-droppable,
+.menu-section-wrapper[data-last-section="true"] .section-header-droppable {
+  z-index: 10 !important;
+  position: relative !important;
+}
+
+/* Ensure hover states are visible when dragging */
+body.is-dragging-product .menu-section-wrapper[data-drag-over="true"] .section-header-droppable {
+  background-color: #f9f9f9 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+  z-index: 50 !important;
+}
+
+/* Ensure progress bar is visible for first and last sections */
+.menu-section-wrapper[data-first-section="true"] .section-hover-progress,
+.menu-section-wrapper[data-last-section="true"] .section-hover-progress {
+  z-index: 15 !important;
+  height: 3px; /* Slightly taller for better visibility */
+  background-color: #3b37f2;
+}
+
+/* More pronounced pulse animation for all sections */
+@keyframes section-hover-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+  50% {
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+    background-color: #f0f0f0;
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+  }
+}
+
+/* Apply the enhanced pulse animation to section headers when hovering */
+body.is-dragging-product .menu-section-wrapper[data-drag-over="true"] .section-header-droppable {
+  animation: section-hover-pulse 1.5s infinite;
+}
+
+/* Ensure the hover state doesn't have a blue overlay */
+body.is-dragging-product .section-header-droppable[data-over="true"] {
+  background-color: #f9f9f9 !important;
+  border: none !important;
+}
+
+/* Fix for first and last sections */
+.menu-section-wrapper:first-child,
+.menu-section-wrapper:last-child {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+.menu-section-wrapper:first-child .section-header-droppable,
+.menu-section-wrapper:last-child .section-header-droppable {
+  position: relative !important;
+  z-index: 5 !important;
+}
+
+/* Ensure all sections have the same hover behavior */
+.menu-section-wrapper[data-drag-over="true"] {
+  z-index: 10 !important;
+}
+
+/* Fix for newly added sections */
+.menu-section-wrapper:last-of-type {
+  position: relative !important;
+  z-index: 2 !important;
+}
+
+/* Special styles for first and last sections to ensure hover state works */
+.first-section .section-header-droppable,
+.last-section .section-header-droppable {
+  z-index: 20 !important;
+  position: relative !important;
+}
+
+/* Ensure hover detection works for first and last sections */
+body.is-dragging-product .first-section[data-drag-over="true"] .section-header-droppable,
+body.is-dragging-product .last-section[data-drag-over="true"] .section-header-droppable {
+  background-color: #f9f9f9 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+  z-index: 50 !important;
+  animation: section-hover-pulse 1.5s infinite;
+}
+
+/* Create a subtle gray pulse animation */
+@keyframes section-hover-pulse-gray {
+  0% {
+    background-color: #f9f9f9;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.05);
+  }
+  50% {
+    background-color: #f0f0f0;
+    box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  }
+  100% {
+    background-color: #f9f9f9;
+    box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Apply the enhanced pulse animation to all section headers when hovering */
+body.is-dragging-product .menu-section-wrapper[data-drag-over="true"] .section-header-droppable {
+  animation: section-hover-pulse-gray 1.5s infinite;
+}
+
+/* Ensure proper z-index values for all sections */
+.menu-section-wrapper {
+  z-index: 1;
+}
+.menu-section-wrapper[data-drag-over="true"] {
+  z-index: 100 !important;
+}
+.menu-section-wrapper:first-child {
+  z-index: 2;
+}
+.menu-section-wrapper:last-child {
+  z-index: 2;
+}
+
+/* Enhanced styles for first and last section hover states */
+.first-section .section-header-droppable,
+.last-section .section-header-droppable {
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+/* Ensure hover detection works for first and last sections */
+body.is-dragging-product .first-section[data-drag-over="true"] .section-header-droppable,
+body.is-dragging-product .last-section[data-drag-over="true"] .section-header-droppable {
+  background-color: #f9f9f9 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+  z-index: 50 !important;
+  animation: section-hover-pulse 1.5s infinite;
+}
+
+/* Ensure all sections have proper z-index stacking */
+.menu-section-wrapper {
+  z-index: 1;
+}
+.menu-section-wrapper[data-drag-over="true"] {
+  z-index: 100 !important;
+}
+.menu-section-wrapper:first-child {
+  z-index: 2;
+}
+.menu-section-wrapper:last-child {
+  z-index: 2;
+}
+
+/* Ensure hover state is visible for all sections */
+body.is-dragging-product .menu-section-wrapper .section-header-droppable:hover,
+body.is-dragging-product .menu-section-wrapper[data-hovering="true"] .section-header-droppable {
+  background-color: #f9f9f9 !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-1px) !important;
+}
+
+/* Add styles for rejected drops */
+.drop-rejected {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+.drop-rejected-overlay {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  border-color: #ef4444 !important;
+  background-color: rgba(239, 68, 68, 0.1) !important;
+}
+
+@keyframes shake {
+  10%,
+  90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  20%,
+  80% {
+    transform: translate3d(2px, 0, 0);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+  40%,
+  60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+/* Enhance dropzone styles */
+[data-droppable="true"] {
+  transition: all 0.2s ease;
+}
+
+[data-droppable="true"][data-over="true"] {
+  transform: scale(1.02);
+  box-shadow: 0 0 0 2px rgba(59, 55, 242, 0.3);
+}
+
+/* Add styles for the product ghost state */
+.product-ghost {
+  opacity: 0.5;
+  transform: scale(0.95);
+  transition: all 0.3s ease;
+}
+
+.product-ghost.restore {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Add these styles at the end of the file */
+/* Ensure the sidepanel is properly recognized as a drop target */
+[data-sidepanel="true"] {
+  position: relative;
+  z-index: 10;
+  transition: background-color 0.2s ease;
+}
+
+/* Prevent shake animation when dropping back onto the sidepanel */
+body.is-dragging-product [data-sidepanel="true"] {
+  transition: none !important;
+}
+
+/* Ensure the drop rejection animation doesn't trigger for sidepanel drops */
+body.is-dragging-product [data-sidepanel="true"][data-over="true"] {
+  background-color: rgba(59, 55, 242, 0.05) !important;
+  border: 1px dashed rgba(59, 55, 242, 0.3) !important;
+}
+
+/* Add these styles at the end of the file to fix sidepanel scrolling */
+[data-sidepanel="true"] {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Ensure the ScrollArea takes up the full available height */
+.side-panel-scroll {
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Add bottom padding to ensure the last items are visible when scrolled */
+.scroll-area-viewport > div {
+  padding-bottom: 100px;
+}
+
+/* Add styles to make it clear that sections can't be dropped inside other sections */
+/* Add these styles at the end of the file */
+
+/* Disable hover effects on sections when dragging a section */
+body.is-dragging-section .menu-section-wrapper:not([data-dragging="true"]) .section-header-droppable:hover {
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  cursor: default !important;
+}
+
+/* Make drop indicators more prominent */
+.menu-section-wrapper [data-drop-position="top"],
+.menu-section-wrapper [data-drop-position="bottom"] {
+  position: relative;
+  z-index: 100;
+}
+
+/* Add a class to the body when dragging a section */
+body.is-dragging-section {
+  cursor: grabbing;
+}
+
+/* Ensure the section being dragged has a higher z-index */
+.menu-section-wrapper[data-dragging="true"] {
+  z-index: 1000 !important;
+  position: relative;
+}
+
+/* Add these styles to improve the visual distinction between section sorting and product dragging */
+
+/* Add these styles at the end of the file */
+body[data-drag-type="section"] .menu-section-wrapper:not([data-dragging="true"]) {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body[data-drag-type="section"] .menu-section-wrapper:not([data-dragging="true"]):hover {
+  transform: translateY(0) !important;
+  box-shadow: none !important;
+}
+
+body[data-drag-type="section"] .menu-section-wrapper[data-dragging="true"] {
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  outline: 2px solid #3b37f2;
+  border-radius: 8px;
+  opacity: 0.9;
+}
+
+/* Improve the drop indicators for section sorting */
+body[data-drag-type="section"] .menu-section-wrapper:not([data-dragging="true"]) {
+  position: relative;
+}
+
+/* Make the section being dragged visually distinct */
+body[data-drag-type="section"] .dnd-kit-drag-overlay {
+  cursor: grabbing !important;
+}
+
+/* Disable product-specific interactions during section sorting */
+body[data-drag-type="section"] [data-droppable="true"][data-over="true"]:not(.section-header-droppable) {
+  animation: none !important;
+  background-color: transparent !important;
+  border-color: transparent !important;
+}
+
+/* Add these styles to the end of the file to improve the visual distinction between section and product dragging */
+
+\`\`\`css /* Clear section sorting styles */
+  body[data-drag-type="section"]
+  .menu-section-wrapper:not([data-dragging="true"]) {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* When sorting sections, make drop indicators clear and section-width only */
+body[data-drag-type="section"] .menu-section-wrapper:not([data-dragging="true"]) {
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  transition: border-color 0.2s ease;
+}
+
+body[data-drag-type="section"] .menu-section-wrapper[data-over="true"]::before {
+  content: "";
+  position: absolute;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  background-color: #3b37f2;
+  z-index: 100;
+}
+
+body[data-drag-type="section"][data-drop-position="top"] .menu-section-wrapper[data-over="true"]::before {
+  top: -1px;
+}
+
+body[data-drag-type="section"][data-drop-position="bottom"] .menu-section-wrapper[data-over="true"]::before {
+  bottom: -1px;
+}
+
+/* Dragging section visual styles */
+body[data-drag-type="section"] .menu-section-wrapper[data-dragging="true"] {
+  z-index: 1000;
+  background-color: white;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  opacity: 0.9;
+}
+
+/* Disable product interactions during section sorting */
+body.sorting-sections-only [data-droppable="true"] {
+  pointer-events: none !important;
+}
+
+/* Disable section sorting during product dragging */
+body.dragging-products-only .menu-section-wrapper {
+  pointer-events: auto !important;
+}
+
+/* Ensure drop indicator has proper width */
+body[data-drag-type="section"] .fixed.pointer-events-none.z-\[1000\] {
+  width: calc(100% - 500px) !important;
+  left: 50px !important;
+  right: auto !important;
+}
+
+/* Section indicator SVG should match section width */
+body[data-drag-type="section"] .relative.mx-4 svg {
+  width: 100%;
+}
+
+/* Add these CSS rules at the end of the file to enforce vertical-only movement for menu sections */
+
+/* Strict vertical-only drag styles for menu sections */
+.vertical-only-drag {
+  transform: translateY(var(--y, 0)) !important;
+  transform-origin: center center !important;
+  cursor: ns-resize !important;
+  touch-action: pan-y !important;
+}
+
+/* Override any transform that might include horizontal movement */
+[data-vertical-only="true"] {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+  touch-action: pan-y !important;
+}
+
+/* When dragging a section, ensure cursor indicates vertical-only movement */
+body[data-drag-type="section"] .menu-section-wrapper[data-dragging="true"] {
+  cursor: ns-resize !important;
+  touch-action: pan-y !important;
+}
+
+/* Ensure the drag handle also indicates vertical-only movement */
+body[data-drag-type="section"] .menu-section-wrapper .drag-handle {
+  cursor: ns-resize !important;
+  touch-action: pan-y !important;
+}
+
+/* Force vertical-only movement for the drag overlay */
+body[data-drag-type="section"] .dnd-kit-drag-overlay {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: calc(100% - 500px) !important;
+  cursor: ns-resize !important;
+  touch-action: pan-y !important;
+}
+
+/* Ensure the drag overlay content only moves vertically */
+body[data-drag-type="section"] .dnd-kit-drag-overlay > div {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  width: calc(100% - 500px) !important;
+}
+
+/* Prevent any horizontal movement during drag */
+body.is-dragging-section * {
+  transform-style: preserve-3d !important;
+  backface-visibility: hidden !important;
+  will-change: transform !important;
+}
+
+/* Force vertical-only movement for all draggable elements */
+[data-axis="y"] {
+  touch-action: pan-y !important;
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+}
+
+/* Add these CSS rules at the end of the file to ensure the drop indicator snaps properly and sections only move vertically: */
+
+/* Enhanced drop indicator styles for snapping behavior */
+.section-drop-indicator {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: hsl(var(--primary));
+  z-index: 1000;
+  pointer-events: none;
+  transition: transform 0.15s ease-out;
+}
+
+/* Ensure sections can only move vertically */
+.vertical-only-drag {
+  transform: translateY(var(--y, 0)) !important;
+  transform-origin: center !important;
+  transition: transform 0.2s ease !important;
+}
+
+/* Override any transform that might include horizontal movement */
+[data-vertical-only="true"] {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center !important;
+}
+
+/* Ensure the drag overlay only moves vertically */
+body[data-drag-type="section"] .dnd-kit-drag-overlay {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center !important;
+  cursor: ns-resize !important;
+}
+
+/* Ensure drop indicators snap to section edges */
+.drop-indicator-snapped {
+  position: absolute;
+  left: 40px;
+  right: 40px;
+  height: 2px;
+  background-color: hsl(var(--primary));
+  z-index: 1000;
+  pointer-events: none;
+}
+
+.drop-indicator-snapped[data-position="top"] {
+  top: -1px;
+}
+
+.drop-indicator-snapped[data-position="bottom"] {
+  bottom: -1px;
+}
+
+/* Add a subtle animation to make the snapped indicator more visible */
+@keyframes indicator-pulse {
+  0%,
+  100% {
+    opacity: 0.8;
+    height: 2px;
+  }
+  50% {
+    opacity: 1;
+    height: 3px;
+  }
+}
+
+.drop-indicator-snapped {
+  animation: indicator-pulse 1.5s ease-in-out infinite;
+}
+
+/* Add these styles at the end of the file to enforce strict vertical-only movement */
+
+/* Aggressive vertical-only constraints for section dragging */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  left: 0 !important;
+  right: 0 !important;
+  width: calc(100% - 500px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+}
+
+/* Force the drag overlay content to stay centered */
+body.is-dragging-section .dnd-kit-drag-overlay > div {
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  transform: none !important;
+}
+
+/* Override DnD Kit's default transform behavior */
+body.is-dragging-section [data-vertical-only="true"] {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: calc(100% - 500px) !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Ensure the drag handle indicates vertical-only movement */
+body.is-dragging-section .menu-section-wrapper .drag-handle,
+.menu-section-wrapper[data-dragging="true"] .drag-handle {
+  cursor: ns-resize !important;
+}
+
+/* Completely disable horizontal transforms */
+.vertical-only-drag,
+[data-vertical-only="true"],
+body.is-dragging-section .dnd-kit-draggable {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+  left: 0 !important;
+  right: 0 !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Ensure the drag overlay is properly positioned */
+.dnd-kit-drag-overlay {
+  position: fixed !important;
+  pointer-events: none !important;
+  z-index: 999 !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Force vertical-only movement for the drag overlay */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  transform: translateY(var(--transform-y, 0)) !important;
+  transform-origin: center center !important;
+}
+
+/* Ensure the drag overlay content is properly positioned */
+body.is-dragging-section .dnd-kit-drag-overlay > div {
+  transform: translateY(0) !important;
+  transform-origin: center center !important;
+}
+
+/* Fix for section dragging to maintain original width */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  width: auto !important;
+  left: auto !important;
+  right: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+body.is-dragging-section .dnd-kit-drag-overlay > div {
+  width: auto !important;
+  left: auto !important;
+  right: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Ensure the section being dragged maintains its original width */
+.menu-section-wrapper[data-dragging="true"] {
+  width: auto !important;
+  left: auto !important;
+  right: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+}
+
+/* Override any transform that might include horizontal movement */
+.vertical-only-drag {
+  transform: translateY(var(--y, 0)) !important;
+  width: auto !important;
+  left: auto !important;
+  right: auto !important;
+}
+
+/*
+Add
+  these
+  styles
+  at
+  the
+  end
+  of
+  the
+  file
+  to
+  improve
+  the
+  ghost
+  state
+  of
+  dragged
+  sections */ /* Improve ghost state for dragged sections */
+body[data-drag-type="section"] .menu-section-wrapper[data-dragging="true"] {
+  z-index: 1000;
+  background-color: white;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+  border-radius: 0;
+  opacity: 0.4;
+}
+
+/* Override the existing styles for dragged sections */
+body[data-drag-type="section"] .dnd-kit-drag-overlay {
+  cursor: grabbing !important;
+  opacity: 1 !important;
+}
+
+/* Ensure the dragged section doesn't have a blue outline */
+body[data-drag-type="section"] .menu-section-wrapper[data-dragging="true"],
+body.is-dragging-section .menu-section-wrapper[data-dragging="true"] {
+  outline: none !important;
+  border: none !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Ensure the ghost state remains in its original position */
+.menu-section-wrapper[data-dragging="true"] {
+  transform: none !important;
+  position: relative !important;
+}
+
+/* Ensure the drag overlay has the correct styling */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  background-color: white;
+  border-radius: 8px;
+}
+
+/* Ensure the ghost state of menu sections stays fixed in its original position */
+.menu-section-wrapper[data-dragging="true"] {
+  transform: none !important;
+  transition: none !important;
+  position: relative !important;
+  opacity: 0.4 !important;
+}
+
+/* Override any DnD Kit styles that might move the ghost */
+[data-dragging="true"] {
+  transform: none !important;
+  transition: none !important;
+}
+
+/* Ensure the drag overlay (the element following the cursor) is properly styled */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  transform: translateY(var(--transform-y, 0)) !important;
+  width: var(--section-original-width, auto) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  background-color: white !important;
+  border-radius: 8px !important;
+  z-index: 9999 !important;
+}
+
+/* Prevent any animation or transition on the ghost state */
+.menu-section-wrapper[data-dragging="true"] * {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Add these styles at the end of the file to ensure the ghost state is left-aligned with only reduced opacity */
+
+/* Ensure the ghost state of menu sections stays fixed in its original position with only reduced opacity */
+.menu-section-wrapper[data-dragging="true"] {
+  transform: none !important;
+  transition: none !important;
+  position: relative !important;
+  opacity: 0.4 !important;
+  left: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: auto !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+}
+
+/* Override any DnD Kit styles that might move the ghost */
+[data-dragging="true"] {
+  transform: none !important;
+  transition: none !important;
+  left: auto !important;
+  margin-left: 0 !important;
+  transform-origin: initial !important;
+}
+
+/* Ensure the drag overlay (the element following the cursor) is properly styled */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  transform: translateY(var(--transform-y, 0)) !important;
+  width: var(--section-original-width, auto) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  background-color: white !important;
+  border-radius: 8px !important;
+  z-index: 9999 !important;
+  left: auto !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+}
+
+/* Remove any centering or alignment styles from the ghost state */
+body[data-drag-type="section"] .menu-section-wrapper[data-dragging="true"] {
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  left: auto !important;
+  right: auto !important;
+  transform: none !important;
+  transform-origin: initial !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+  background-color: transparent !important;
+}
+
+/* Add these styles at the end of the file to fix the first-time section drag issue */
+
+/* Ensure consistent dimensions for section dragging from the first drag */
+.menu-section-wrapper {
+  transform-origin: center center !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+}
+
+/* Pre-initialize drag overlay styles to prevent layout shift on first drag */
+.dnd-kit-drag-overlay {
+  position: fixed !important;
+  pointer-events: none !important;
+  z-index: 999 !important;
+  left: 0 !important;
+  top: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform-origin: center center !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+}
+
+/* Force hardware acceleration for smoother dragging */
+body.is-dragging-section * {
+  backface-visibility: hidden !important;
+  -webkit-backface-visibility: hidden !important;
+  -webkit-transform-style: preserve-3d !important;
+  transform-style: preserve-3d !important;
+  will-change: transform !important;
+}
+
+/* Ensure the drag overlay has consistent dimensions from the first drag */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  transform: translateY(var(--transform-y, 0)) !important;
+  width: var(--section-original-width, auto) !important;
+  left: var(--section-original-left, auto) !important;
+  height: var(--section-original-height, auto) !important;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+  background-color: white !important;
+  border-radius: 8px !important;
+  z-index: 9999 !important;
+  transition: none !important;
+}
+
+/* Prevent any transition or animation during section dragging */
+body.is-dragging-section .dnd-kit-drag-overlay,
+body.is-dragging-section .dnd-kit-drag-overlay > div {
+  transition: none !important;
+  animation: none !important;
+}
+
+/* Ensure the ghost state is consistent from the first drag */
+.menu-section-wrapper[data-dragging="true"] {
+  transform: none !important;
+  transition: none !important;
+  position: relative !important;
+  opacity: 0.4 !important;
+  left: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: auto !important;
+  box-shadow: none !important;
+  outline: none !important;
+  border: none !important;
+  border-radius: 0 !important;
+  background-color: transparent !important;
+}
+/* Fix for section dragging to maintain original dimensions */
+body.is-dragging-section .menu-section-wrapper[data-dragging="true"] {
+  width: var(--section-original-width, auto) !important;
+  left: var(--section-original-left, auto) !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  transform: none !important;
+}
+
+/* Ensure the drag overlay maintains the original section dimensions */
+body.is-dragging-section .dnd-kit-drag-overlay {
+  width: var(--section-original-width, auto) !important;
+  left: var(--section-original-left, auto) !important;
+  transform: translateY(var(--transform-y, 0)) !important;
+  position: fixed !important;
+  margin: 0 !important;
+  transition: none !important;
+}
+
+/* Ensure the drag overlay content maintains width */
+body.is-dragging-section .dnd-kit-drag-overlay > div {
+  width: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  transform: none !important;
+}
+
+/* Prevent any transform transitions during section dragging */
+body.is-dragging-section * {
+  transition-property: background-color, border-color, color, fill, stroke !important;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1) !important;
+  transition-duration: 150ms !important;
+}
+
+/* Ensure the ghost section maintains its original position */
+.menu-section-wrapper[data-dragging="true"] {
+  transform: none !important;
+  transition: none !important;
+  position: relative !important;
+  opacity: 0.4 !important;
+  left: auto !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  width: auto !important;
+}
+
+/* Pre-initialize dimensions for all sections to prevent layout shift */
+.menu-section-wrapper {
+  transform-origin: center center !important;
+  will-change: transform !important;
+  backface-visibility: hidden !important;
+}

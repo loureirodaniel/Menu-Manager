@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
 import { Filter } from "lucide-react"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import ProductItem from "./product-item"
+import { Button } from "@/components/ui/button"
 
 interface Product {
   id: string
@@ -29,21 +29,93 @@ interface ProductSidepanelContentProps {
 }
 
 export default function ProductSidepanelContent({
-  products,
-  selectedProducts,
+  products = [], // Provide default empty array
+  selectedProducts = [], // Provide default empty array
   setSelectedProducts,
   onAddProducts,
 }: ProductSidepanelContentProps) {
   const [searchTerm, setSearchTerm] = useState("")
+  const [isDragging, setIsDragging] = useState(false)
 
-  const filteredProducts = products.filter((product) => product.name.toLowerCase().includes(searchTerm.toLowerCase()))
+  // Listen for global drag events to detect when a product is being dragged
+  useEffect(() => {
+    const handleDragStart = () => {
+      if (document.body.classList.contains("is-dragging-product")) {
+        setIsDragging(true)
+      }
+    }
+
+    const handleDragEnd = () => {
+      setIsDragging(false)
+    }
+
+    document.addEventListener("dragstart", handleDragStart)
+    document.addEventListener("dragend", handleDragEnd)
+
+    // Also listen for DnD-kit specific classes
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName === "class") {
+          const body = document.body
+          const isDraggingProduct = body.classList.contains("is-dragging-product")
+
+          // Only update state if it's actually changing
+          if (isDraggingProduct && !isDragging) {
+            setIsDragging(true)
+          } else if (!isDraggingProduct && isDragging) {
+            setIsDragging(false)
+          }
+        }
+      })
+    })
+
+    observer.observe(document.body, { attributes: true })
+
+    return () => {
+      document.removeEventListener("dragstart", handleDragStart)
+      document.removeEventListener("dragend", handleDragEnd)
+      observer.disconnect()
+    }
+  }, [isDragging])
+
+  // Add this after the existing useEffect hooks
+  useEffect(() => {
+    // Add a global event listener to constrain drag movement
+    const handleDragMove = (e: any) => {
+      if (isDragging) {
+        // Use a data attribute selector instead of class with square brackets
+        const sidepanelRect = document.querySelector("[data-sidepanel='true']")?.getBoundingClientRect()
+        if (sidepanelRect && e.clientX > sidepanelRect.right + 50) {
+          // Prevent the default behavior to stop the drag
+          e.preventDefault()
+          e.stopPropagation()
+        }
+      }
+    }
+
+    document.addEventListener("mousemove", handleDragMove)
+    document.addEventListener("touchmove", handleDragMove, { passive: false })
+
+    return () => {
+      document.removeEventListener("mousemove", handleDragMove)
+      document.removeEventListener("touchmove", handleDragMove)
+    }
+  }, [isDragging])
+
+  // Ensure products is always an array
+  const safeProducts = Array.isArray(products) ? products : []
+
+  const filteredProducts = safeProducts.filter((product) =>
+    product.name.toLowerCase().includes(searchTerm.toLowerCase()),
+  )
 
   const handleSelect = (id: string, isSelected: boolean) => {
     setSelectedProducts((prev) => {
+      const safeArray = Array.isArray(prev) ? prev : []
       if (isSelected) {
-        return [...prev, id]
+        return [...safeArray, id]
       } else {
-        return prev.filter((productId) => productId !== id)
+        return safeArray.filter((productId) => productId !== id)
       }
     })
   }
@@ -56,15 +128,28 @@ export default function ProductSidepanelContent({
     setSelectedProducts([])
   }
 
+  // Ensure selectedProducts is always an array
+  const safeSelectedProducts = Array.isArray(selectedProducts) ? selectedProducts : []
+
+  // Calculate allSelectedProducts safely
+  const allSelectedProducts =
+    Array.isArray(safeSelectedProducts) && safeSelectedProducts.length > 1 && Array.isArray(safeProducts)
+      ? safeProducts.filter(
+          (p) => p && p.id && Array.isArray(safeSelectedProducts) && safeSelectedProducts.includes(p.id),
+        )
+      : []
+
   return (
-    <div className="w-[468px] bg-background h-screen border-l relative">
-      <div className="p-6 flex flex-col h-full">
-        <div className="space-y-4">
+    <div
+      className="w-[400px] bg-background fixed right-0 top-0 bottom-0 border-l shadow-sm flex flex-col h-full"
+      data-sidepanel="true"
+    >
+      <div className="p-6 flex flex-col h-full pt-10">
+        {" "}
+        {/* Further reduced padding to account for the top bar */}
+        <div className="space-y-4 flex-shrink-0">
           <div>
             <h2 className="text-lg font-semibold">Products</h2>
-            <p className="text-sm text-muted-foreground">
-              Select products and click "Add" to include them in your menu or drag them directly to a section.
-            </p>
           </div>
 
           <div className="relative">
@@ -76,35 +161,48 @@ export default function ProductSidepanelContent({
             />
             <Filter className="absolute right-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
           </div>
-        </div>
 
-        <ScrollArea className="flex-1 -mx-6 px-6">
-          <div className="space-y-2 py-4">
+          {safeSelectedProducts.length > 0 && (
+            <div
+              className={`p-3 mb-4 rounded-lg flex items-center justify-between ${safeSelectedProducts.length > 0 ? "multi-select-active" : "bg-muted/50"}`}
+            >
+              <div className="font-medium">
+                {safeSelectedProducts.length} {safeSelectedProducts.length === 1 ? "item" : "items"} selected
+              </div>
+              <div className="flex gap-2">
+                <Button variant="ghost" size="sm" onClick={handleClearSelection}>
+                  Cancel
+                </Button>
+                <Button size="sm" onClick={handleAddSelected}>
+                  Add
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+        <ScrollArea className="flex-grow overflow-y-auto pr-4 -mr-4">
+          <div className="space-y-2 py-4 pb-0">
             {filteredProducts.map((product) => (
               <ProductItem
                 key={product.id}
                 product={product}
-                isSelected={selectedProducts.includes(product.id)}
+                isSelected={Boolean(
+                  Array.isArray(safeSelectedProducts) &&
+                    safeSelectedProducts &&
+                    product &&
+                    product.id &&
+                    safeSelectedProducts.includes(product.id),
+                )}
                 onSelect={handleSelect}
                 isDraggable={true}
-                allSelectedProducts={
-                  selectedProducts.length > 1 ? products.filter((p) => selectedProducts.includes(p.id)) : undefined
-                }
+                selectedProductIds={safeSelectedProducts}
+                allProducts={safeProducts}
+                allSelectedProducts={allSelectedProducts}
               />
             ))}
           </div>
         </ScrollArea>
-
-        <div className="flex justify-between items-center pt-4 mt-4 border-t">
-          <Button variant="ghost" onClick={handleClearSelection} disabled={selectedProducts.length === 0}>
-            Clear Selection
-          </Button>
-          <Button onClick={handleAddSelected} disabled={selectedProducts.length === 0}>
-            Add items {selectedProducts.length > 0 ? `(${selectedProducts.length})` : ""}
-          </Button>
-        </div>
       </div>
     </div>
   )
 }
-

@@ -52,4 +52,3 @@ export function DebugOverlay({ enabled = false }: DebugOverlayProps) {
     </div>
   )
 }
-

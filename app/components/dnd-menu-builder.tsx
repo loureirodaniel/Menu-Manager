@@ -260,8 +260,11 @@ export default function DndMenuBuilder({
     setCollisions(collisions || [])
   }
 
-  // Handle drag end
+  // Update the handleDragEnd function to allow adding the same product to multiple sections
   function handleDragEnd(event: DragEndEvent) {
+    // Prevent animation back to original position
+    document.body.classList.add("drag-operation-complete")
+
     const { active, over } = event
 
     document.body.classList.remove("is-dragging")
@@ -285,26 +288,12 @@ export default function DndMenuBuilder({
     const targetSection = sections.find((section) => section.id === overId)
 
     if (targetSection) {
-      // Check if product is already in any section
-      const productInSections = sections.some((section) => section.items.some((item) => item.id === product.id))
-
-      // Update sections
+      // Update sections - allow the same product in multiple sections
       const updatedSections = sections.map((section) => {
         if (section.id === overId) {
-          // Don't add duplicate products
-          if (section.items.some((item) => item.id === product.id)) {
-            return section
-          }
           return {
             ...section,
             items: [...section.items, product],
-          }
-        }
-        // If product was moved from another section, remove it
-        if (productInSections) {
-          return {
-            ...section,
-            items: section.items.filter((item) => item.id !== product.id),
           }
         }
         return section
@@ -312,6 +301,11 @@ export default function DndMenuBuilder({
 
       onSectionUpdate(updatedSections)
     }
+
+    // Remove the class after a short delay
+    setTimeout(() => {
+      document.body.classList.remove("drag-operation-complete")
+    }, 50)
   }
 
   return (
@@ -366,4 +360,3 @@ export default function DndMenuBuilder({
     </DndContext>
   )
 }
-

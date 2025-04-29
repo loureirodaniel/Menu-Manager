@@ -31,37 +31,64 @@ export default function ProductItem({
   isSelected,
   onSelect,
   isDraggable = false,
-  selectedProductIds = [],
-  allProducts = [],
+  selectedProductIds,
+  allProducts,
   allSelectedProducts,
 }: ProductItemProps) {
+  // Ensure we have safe values to work with - use explicit null checks
+  const safeSelectedProductIds = selectedProductIds && Array.isArray(selectedProductIds) ? selectedProductIds : []
+  const safeAllProducts = allProducts && Array.isArray(allProducts) ? allProducts : []
+  const safeAllSelectedProducts = allSelectedProducts && Array.isArray(allSelectedProducts) ? allSelectedProducts : []
+
+  // Explicitly check if safeAllSelectedProducts is an array and has length > 1
+  const isMultipleSelected = Boolean(
+    isSelected &&
+      safeAllSelectedProducts &&
+      Array.isArray(safeAllSelectedProducts) &&
+      safeAllSelectedProducts.length > 1,
+  )
+
+  // Use optional chaining for safety
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
-    id: product.id,
+    id: product?.id || "unknown",
     data: {
       product,
       type: "product",
-      isMultiple: isSelected && allSelectedProducts && allSelectedProducts.length > 1,
+      isMultiple: isMultipleSelected,
+      // Ensure we're only mapping if it's an array
       selectedProductIds:
-        isSelected && allSelectedProducts && allSelectedProducts.length > 1
-          ? allSelectedProducts.map((p) => p.id)
-          : undefined,
-      selectedProducts:
-        isSelected && allSelectedProducts && allSelectedProducts.length > 1 ? allSelectedProducts : undefined,
-      allProducts: allProducts.length > 0 ? allProducts : undefined,
+        isMultipleSelected && Array.isArray(safeAllSelectedProducts)
+          ? safeAllSelectedProducts.map((p) => p?.id || "").filter(Boolean)
+          : [],
+      selectedProducts: isMultipleSelected ? safeAllSelectedProducts : [],
+      allProducts: safeAllProducts,
     },
     disabled: !isDraggable,
+    modifiers: [
+      // Add a modifier to constrain horizontal movement
+      (args) => {
+        // Only allow dragging to the left (negative x values)
+        // If x is positive (dragging right), set it to 0
+        if (args.transform.x > 0) {
+          args.transform.x = 0
+        }
+        return args
+      },
+    ],
   })
 
   const style = transform
     ? {
         transform: CSS.Translate.toString(transform),
-        opacity: isDragging ? 0.5 : 1,
+        // Don't change opacity - we'll handle the ghost effect with CSS classes
         zIndex: isDragging ? 1000 : 1,
       }
     : undefined
 
   const handleCheckboxChange = (checked: boolean) => {
-    onSelect(product.id, checked)
+    if (typeof onSelect === "function") {
+      onSelect(product.id, checked)
+    }
   }
 
   return (
@@ -70,8 +97,8 @@ export default function ProductItem({
       style={style}
       data-dragging={isDragging}
       className={`flex items-center p-4 bg-white border-[1.5px] ${
-        isSelected ? "border-primary" : "border-[#DFDFEA]"
-      } rounded-lg ${isDraggable ? "draggable-item" : ""}`}
+        Boolean(isSelected) ? "border-primary" : "border-[#DFDFEA]"
+      } rounded-lg ${isDraggable ? "draggable-item product-item" : ""} ${isDragging ? "product-ghost" : ""} max-w-[350px]`}
     >
       {isDraggable && (
         <div
@@ -87,7 +114,7 @@ export default function ProductItem({
           id={`checkbox-${product.id}`}
           checked={isSelected}
           onCheckedChange={handleCheckboxChange}
-          className="mx-3"
+          className="mx-3 text-gray-300 border-gray-300"
         />
       </div>
       <div className="flex-1 flex items-start">
@@ -123,4 +150,3 @@ export default function ProductItem({
     </div>
   )
 }
-
